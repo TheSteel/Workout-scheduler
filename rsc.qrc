@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Icons/back.png</file>
+        <file>Icons/drawer.png</file>
+        <file>Icons/menu.png</file>
+        <file>Icons/minus.png</file>
+        <file>Icons/plus.png</file>
+        <file>Icons/trash.png</file>
+        <file>Qml/CustomControls/CustomCheckBox.qml</file>
+        <file>Qml/CustomControls/CustomComboBox.qml</file>
+        <file>Qml/CustomControls/CustomSpinBox.qml</file>
+        <file>Qml/CustomControls/CustomTumbler.qml</file>
+        <file>Qml/CustomControls/DSpinBox.qml</file>
+        <file>Qml/Learn/LearnMain.qml</file>
+        <file>Qml/Scheduler/ProgrammList.qml</file>
+        <file>Qml/Scheduler/TrainDay.qml</file>
+        <file>Qml/Scheduler/TrainDayList.qml</file>
+        <file>Qml/Train/RestTimer.qml</file>
+        <file>Qml/Train/StartTrain.qml</file>
+        <file>Qml/Train/TrainingPage.qml</file>
+        <file>Qml/MainPage.qml</file>
+    </qresource>
+</RCC>
