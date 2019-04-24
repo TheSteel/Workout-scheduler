@@ -4,6 +4,8 @@ import QtQuick.Window 2.11
 import QtQuick.Layouts 1.11
 import QtQuick.Controls.Styles 1.4
 
+import "../CustomControls"
+
 Page {
     id: progList
     header: Text {
@@ -59,12 +61,10 @@ Page {
                         source: "qrc:/Icons/drawer"
                         fillMode: Image.PreserveAspectFit
                     }
-                    Menu {
+                    CustomMenu {
                         id: list_item_menu
                         width: progList.width / 3
                         height: progList.height / 10
-                        rightMargin: 30
-                        spacing: 5
                         MenuItem {
                             text: qsTr("Редактировать")
                             width: list_item_menu.width
@@ -125,6 +125,10 @@ Page {
             anchors.fill: parent
             id: inputName
             focus: true
+            wrapMode: Text.WordWrap
+            validator: RegExpValidator {
+                regExp: /[\w ]+/
+            }
         }
 
         standardButtons: DialogButtonBox.Apply | DialogButtonBox.Cancel

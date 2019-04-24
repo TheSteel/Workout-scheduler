@@ -86,12 +86,10 @@ Page {
                         source: "qrc:/Icons/drawer"
                         fillMode: Image.PreserveAspectFit
                     }
-                    Menu {
+                    CustomMenu {
                         id: day_item_menu
-                        rightMargin: 10
                         width: trainDayPage.width / 3
                         height: trainDayPage.height / 10
-                        spacing: 5
                         MenuItem {
                             width: day_item_menu.width
                             height: day_item_menu.height / 2
@@ -182,7 +180,6 @@ Page {
                 height: parent.height / 15
                 width: parent.width
                 property int len: 0
-
                 readOnly: true
             }
             Text {

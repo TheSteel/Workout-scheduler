@@ -78,8 +78,10 @@ bool DataBaseHandler::createExerciseTable() {
 
 bool DataBaseHandler::createProgrammDaysTable(const QString &tableName) {
   QString data = tableName;
+  data.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  data.replace(" ", "$");
   if (p_query->exec(
-          "CREATE TABLE IF NOT EXISTS " + data.replace(" ", "_") +
+          "CREATE TABLE IF NOT EXISTS " + data +
           " (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR UNIQUE "
           "NOT NULL, rest TIME, exerciseCount INTEGER DEFAULT 0)"))
     return true;
@@ -92,8 +94,12 @@ bool DataBaseHandler::createProgrammDaysTable(const QString &tableName) {
 
 bool DataBaseHandler::createTrainDayTable(const QString &tableName) {
   QString data = tableName;
+  qDebug() << data;
+  data.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  data.replace(" ", "$");
+  qDebug() << "Train DAY: " << data;
   if (p_query->exec(
-          "CREATE TABLE IF NOT EXISTS " + data.replace(" ", "_") +
+          "CREATE TABLE IF NOT EXISTS " + data +
           " (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATETIME, name "
           "VARCHAR UNIQUE "
           "NOT NULL, repeat STRING, weight "
@@ -107,10 +113,12 @@ bool DataBaseHandler::createTrainDayTable(const QString &tableName) {
 }
 
 bool DataBaseHandler::insertProgramm(const QString &name) {
+  QString data = name;
+  data.remove(QRegExp("(^[ ]+)|([ ]+$)"));
   p_query->prepare(
       "INSERT INTO programm (name)"
       "VALUES(:name)");
-  p_query->bindValue(":name", name);
+  p_query->bindValue(":name", data);
   if (p_query->exec())
     return true;
   else {
@@ -122,10 +130,15 @@ bool DataBaseHandler::insertProgramm(const QString &name) {
 
 bool DataBaseHandler::insertTrainDay(const QString &name, int restMin,
                                      int restSec, const QString &progName) {
-  p_query->prepare("INSERT INTO " + progName +
+  QString data = progName;
+  data.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  data.replace(" ", "$");
+  QString newName = name;
+  newName.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  p_query->prepare("INSERT INTO " + data +
                    " (name, rest)"
                    "VALUES(:name, :rest)");
-  p_query->bindValue(":name", name);
+  p_query->bindValue(":name", newName);
   p_query->bindValue(":rest", QTime(0, restMin, restSec));
   if (p_query->exec())
     return true;
@@ -140,10 +153,13 @@ bool DataBaseHandler::insertExercise(const QString &name,
                                      const QString &repeats,
                                      const QString &weight,
                                      const QString &dayName, bool update) {
-  if (isExerciseExists(dayName, name))
-    return updateExersice(name, repeats, weight, dayName);
+  QString data = dayName;
+  data.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  data.replace(" ", "$");
+  if (isExerciseExists(data, name))
+    return updateExersice(name, repeats, weight, data);
 
-  p_query->prepare("INSERT INTO " + dayName +
+  p_query->prepare("INSERT INTO " + data +
                    " (name, date,repeat, weight) "
                    "VALUES(:name, :date,:repeat, :weight)");
   p_query->bindValue(":name", name);
@@ -151,7 +167,7 @@ bool DataBaseHandler::insertExercise(const QString &name,
   p_query->bindValue(":repeat", repeats);
   p_query->bindValue(":weight", weight);
   if (p_query->exec()) {
-    if (update) updateExerciseCount(dayName, true);
+    if (update) updateExerciseCount(data, true);
     return true;
   } else {
     qDebug() << "error while insert exercise: " << p_query->lastError().text();
@@ -196,11 +212,18 @@ bool DataBaseHandler::insertExerToList(const QString &name,
 
 bool DataBaseHandler::deleteRecord(const QString &tableName,
                                    const QString &record) {
-  if (p_query->exec("DELETE FROM " + tableName + " WHERE name = '" + record +
+  QString validName = tableName;
+  validName.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  validName.replace(" ", "$");
+  if (p_query->exec("DELETE FROM " + validName + " WHERE name = '" + record +
                     "'")) {
-    QRegExp reg("(_\\w+)(_\\w+)");
-    reg.indexIn(tableName);
-    if (reg.captureCount() > 1) updateExerciseCount(tableName, false);
+    QRegExp reg("(_[\\w$]+)(_[\\w$]+)");
+    reg.indexIn(validName);
+    if (reg.captureCount() > 1) updateExerciseCount(validName, false);
+    QString validRecord = record;
+    validRecord.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+    validRecord.replace(" ", "$");
+    dropLinkedTables(validName + "_" + validRecord);
     return true;
   } else {
     qDebug() << "error while deleting from programm: "
@@ -220,12 +243,12 @@ bool DataBaseHandler::deleteExerFromList(const QString &name,
 
 bool DataBaseHandler::updateExerciseCount(const QString &tableName,
                                           bool isIncrement) {
-  QRegExp getName("(_\\w+)(_\\w+)");
+  QRegExp getName("(_[\\w$]+)(_[\\w$]+)");
   getName.indexIn(tableName);
   if (isIncrement) {
     if (p_query->exec("UPDATE programm" + getName.cap(1) +
                       " SET exerciseCount = exerciseCount + 1 WHERE name = '" +
-                      getName.cap(2).remove(0, 1) + "'"))
+                      getName.cap(2).remove(0, 1).replace("$", " ") + "'"))
       return true;
     else {
       qDebug() << p_query->lastError().text();
@@ -234,7 +257,7 @@ bool DataBaseHandler::updateExerciseCount(const QString &tableName,
   } else {
     if (p_query->exec("UPDATE programm" + getName.cap(1) +
                       " SET exerciseCount = exerciseCount - 1 WHERE name = '" +
-                      getName.cap(2).remove(0, 1) + "'"))
+                      getName.cap(2).remove(0, 1).replace("$", " ") + "'"))
       return true;
     else {
       qDebug() << p_query->lastError().text();
@@ -269,16 +292,23 @@ bool DataBaseHandler::updateExersice(const QString &name,
 }
 
 bool DataBaseHandler::dropTable(const QString &tableName) {
-  if (p_query->exec("DROP TABLE " + tableName)) {
+  QString data = tableName;
+  data.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  data.replace(" ", "$");
+  if (p_query->exec("DROP TABLE " + data)) {
     return true;
   } else {
-    qDebug() << "error while drop table: " + tableName
+    qDebug() << "error while drop table: " + data
              << p_query->lastError().text();
     return false;
   }
 }
 
 bool DataBaseHandler::dropLinkedTables(const QString &tableName) {
+  // QString data = tableName;
+  // data.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  // data.replace(" ", "$");
+  qDebug() << "In Drop Linked Tables " << tableName;
   if (!p_query->exec("SELECT name FROM sqlite_master WHERE name LIKE '" +
                      tableName + "_%'")) {
     qDebug() << "error while drop linked tables: " + tableName
@@ -290,48 +320,14 @@ bool DataBaseHandler::dropLinkedTables(const QString &tableName) {
       names.append(p_query->value(0).toString());
     }
     int i = 0;
+    qDebug() << names;
     while (i < names.size()) {
       p_query->exec("DROP TABLE " + names[i]);
       ++i;
     }
+    p_query->exec("DROP TABLE " + tableName);
     return true;
   }
-}
-bool DataBaseHandler::dropProgramm(
-    const QString &progName) {  // <--------------rework here
-  if (!p_query->exec("SELECT name FROM qslite_master WHERE name LIKE " +
-                     progName + "%"))
-    return false;
-  while (p_query->next()) {
-    p_query->exec("DROP TABLE " + p_query->value(0).toString());
-  }
-  return true;
-}
-
-bool DataBaseHandler::dropTraingDay(
-    const QString &trainDay,
-    const QString &progName) {  // <--------------rework here
-  QSqlQuery query;
-  if (!query.exec("SELECT name FROM qslite_master WHERE name LIKE " + progName +
-                  "_" + trainDay + "%"))
-    return false;
-  while (query.next()) {
-    query.exec("DROP TABLE " + query.value(0).toString());
-  }
-  return true;
-}
-
-bool DataBaseHandler::dropMuscleGroup(
-    const QString &muscleGruop,
-    const QString &progName) {  // <--------------rework here
-  QSqlQuery query;
-  if (!query.exec("SELECT name FROM qslite_master WHERE name LIKE " + progName +
-                  "_" + muscleGruop + "%"))
-    return false;
-  while (query.next()) {
-    query.exec("DROP TABLE " + query.value(0).toString());
-  }
-  return true;
 }
 
 bool DataBaseHandler::isExerciseExists(const QString &tableName,
@@ -356,7 +352,11 @@ QStringList DataBaseHandler::getProgrammList() const {
 }
 
 QStringList DataBaseHandler::getTrainDayData(const QString &tableName) const {
-  if (p_query->exec("SELECT name, rest FROM " + tableName)) {
+  QString name = tableName;
+  name.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  name.replace(" ", "$");
+  qDebug() << name;
+  if (p_query->exec("SELECT name, rest FROM " + name)) {
     QStringList data;
     while (p_query->next()) {
       data.append(p_query->value(0).toString());
@@ -391,10 +391,11 @@ QStringList DataBaseHandler::getExerciseData(const QString &tableName,
 }
 
 int DataBaseHandler::getExerciseCount(const QString &tableName) const {
+  QString data = tableName;
+  data.remove(QRegExp("(^[ ]+)|([ ]+$)"));
+  data.replace(" ", "$");
   QRegExp getName("(_\\w+)(_\\w+)");
-  getName.indexIn(tableName);
-  qDebug() << getName.cap(1);
-  qDebug() << getName.cap(2).remove(0, 1);
+  getName.indexIn(data);
   if (p_query->exec("SELECT exerciseCount FROM programm" + getName.cap(1) +
                     " WHERE name = '" + getName.cap(2).remove(0, 1) + "'")) {
     if (p_query->next()) return p_query->value(0).toInt();

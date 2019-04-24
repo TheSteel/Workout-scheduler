@@ -19,5 +19,6 @@
         <file>Qml/Train/StartTrain.qml</file>
         <file>Qml/Train/TrainingPage.qml</file>
         <file>Qml/MainPage.qml</file>
+        <file>Qml/CustomControls/CustomMenu.qml</file>
     </qresource>
 </RCC>

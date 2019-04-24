@@ -34,6 +34,7 @@ Page {
                              case false:
                                  return repeatsDelegate
                              }
+
             Component {
                 id: exersiceDelegate
                 Column {
@@ -84,14 +85,19 @@ Page {
                                 onClicked: repeat_menu.open()
                             }
 
-                            Menu {
+                            CustomMenu {
                                 id: repeat_menu
-                                spacing: 5
+                                width: training_page.width / 3
+                                height: training_page.height / 10
                                 MenuItem {
+                                    width: repeat_menu.width
+                                    height: repeat_menu.height / 2
                                     text: qsTr("Добавить подход")
                                     onClicked: trainingModel.addRepeat(index)
                                 }
                                 MenuItem {
+                                    width: repeat_menu.width
+                                    height: repeat_menu.height / 2
                                     text: qsTr("Удалить подход")
                                     onClicked: {
                                         trainingModel.removeRepeat(index)
@@ -104,7 +110,7 @@ Page {
                     Row {
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.margins: 5
+                        anchors.margins: 10
                         width: parent.width
                         height: parent.height / 2
 
@@ -121,6 +127,7 @@ Page {
                         CustomComboBox {
                             id: repeat_combo
                             anchors.left: repeat_lbl.right
+                            anchors.leftMargin: 10
                             width: parent.width / 4
                             height: parent.height
                             model: [1, 2, 5, 10, 15, 20]
@@ -145,6 +152,7 @@ Page {
                             height: parent.height
                             width: parent.width / 4
                             anchors.left: weight_lbl.right
+                            anchors.leftMargin: 10
                             model: [0.25, 0.5, 1.0, 1.5, 2, 5, 10]
                             onCurrentIndexChanged: {
                                 trainingModel.setWeightIncr(

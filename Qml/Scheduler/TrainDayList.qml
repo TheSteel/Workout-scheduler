@@ -86,10 +86,8 @@ Page {
                         source: "qrc:/Icons/drawer"
                         fillMode: Image.PreserveAspectFit
                     }
-                    Menu {
+                    CustomMenu {
                         id: train_item_menu
-                        rightMargin: 30
-                        spacing: 5
                         width: trainDayListPage.width / 3
                         height: trainDayListPage.height / 10
                         MenuItem {
@@ -157,6 +155,9 @@ Page {
                 id: inputName
                 focus: true
                 wrapMode: Text.WordWrap
+                validator: RegExpValidator {
+                    regExp: /[\w ]+/
+                }
             }
             RowLayout {
                 Layout.preferredHeight: parent.height - inputName.height

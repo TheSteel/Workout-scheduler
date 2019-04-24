@@ -3,14 +3,18 @@
 #include "listmodel.h"
 
 ListItem::ListItem(const QString &itemName, int min, int sec)
-    : m_name(itemName), m_min(min), m_sec(sec) {}
+    : m_name(QString(itemName).remove(QRegExp("(^[ ])|([ ]$)"))),
+      m_min(min),
+      m_sec(sec) {}
 
 ListItem::ListItem(const QString &itemName)
-    : m_name(itemName), m_min(0), m_sec(0) {}
+    : m_name(QString(itemName).remove(QRegExp("(^[ ])|([ ]$)"))),
+      m_min(0),
+      m_sec(0) {}
 
 ListItem::ListItem(const QString &itemName, const QString &repeats,
                    const QString &workWeight)
-    : m_name(itemName),
+    : m_name(QString(itemName).remove(QRegExp("(^[ ])|([ ]$)"))),
       m_min(0),
       m_sec(0),
       m_repeats(repeats),
@@ -98,8 +102,8 @@ void ListModel::removeItem(const int row, const QString &tableName) {
     return;
   else {
     QString name = m_items.at(row).getItemName();
-    if (p_db->deleteRecord(tableName, name) &&
-        p_db->dropLinkedTables(tableName)) {
+    if (p_db->deleteRecord(tableName, name)) {
+      //&&p_db->dropLinkedTables(tableName)) {
       beginRemoveRows(QModelIndex(), row, row);
       m_items.removeAt(row);
       endRemoveRows();

@@ -245,6 +245,29 @@ Page {
                         radius: 2
                     }
                 }
+                indicator: Canvas {
+                    id: canvas
+                    x: muscGroupList.width - width - muscGroupList.rightPadding
+                    y: muscGroupList.topPadding + (muscGroupList.availableHeight - height) / 2
+                    width: 30
+                    height: 15
+                    contextType: "2d"
+
+                    Connections {
+                        target: muscGroupList
+                        onPressedChanged: canvas.requestPaint()
+                    }
+
+                    onPaint: {
+                        context.reset()
+                        context.moveTo(0, 0)
+                        context.lineTo(width, 0)
+                        context.lineTo(width / 2, height)
+                        context.closePath()
+                        context.fillStyle = muscGroupList.pressed ? "#17a81a" : "#21be2b"
+                        context.fill()
+                    }
+                }
                 onCurrentIndexChanged: {
                     if (currentIndex)
                         muscGroupList.editable = false

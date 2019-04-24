@@ -54,11 +54,6 @@ class DataBaseHandler : public QObject {
 
   Q_INVOKABLE bool dropTable(const QString& tableName);
   Q_INVOKABLE bool dropLinkedTables(const QString& tableName);
-  Q_INVOKABLE bool dropProgramm(const QString& progName);
-  Q_INVOKABLE bool dropTraingDay(const QString& trainDay,
-                                 const QString& progName);
-  Q_INVOKABLE bool dropMuscleGroup(const QString& muscleGruop,
-                                   const QString& progName);
 
   bool isExerciseExists(const QString& tableName, const QString& exerName);
 
